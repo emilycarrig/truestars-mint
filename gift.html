@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gift NFTs</title>
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+</head>
+<body>
+  <h1>Admin: Gift NFTs</h1>
+  <label>Password: <input type="password" id="adminPass"></label>
+  <button onclick="checkPassword()">Enter</button>
+
+  <div id="giftSection" style="display:none;">
+    <button onclick="connectWallet()">Connect Wallet</button><br><br>
+    <label>Wallets (comma separated):<br><textarea id="wallets" rows="5" cols="60"></textarea></label><br>
+    <label>Quantity for each:<input id="quantity" type="number" value="1" min="1"></label><br>
+    <button onclick="gift()">Send Gift Mints</button>
+  </div>
+
+  <script>
+    const correctPassword = "admin123";
+    const contractAddress = "0x2baAfa9961EDff4a313127Aa3baE2b9bd06FE58E";
+    const abi = [{"inputs":[{"internalType":"address[]","name":"_receivers","type":"address[]"},{"internalType":"uint256[]","name":"_mintNumber","type":"uint256[]"}],"name":"gift","outputs":[],"stateMutability":"payable","type":"function"}];
+
+    let signer;
+    let contract;
+
+    function checkPassword() {
+      const pass = document.getElementById("adminPass").value;
+      if (pass === correctPassword) {
+        document.getElementById("giftSection").style.display = "block";
+      } else {
+        alert("Incorrect password");
+      }
+    }
+
+    async function connectWallet() {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      contract = new ethers.Contract(contractAddress, abi, signer);
+      alert("Wallet connected");
+    }
+
+    async function gift() {
+      const wallets = document.getElementById("wallets").value.split(",").map(w => w.trim());
+      const qty = parseInt(document.getElementById("quantity").value);
+      const quantities = wallets.map(() => qty);
+      const totalCost = ethers.utils.parseEther("0").mul(wallets.length);
+      try {
+        const tx = await contract.gift(wallets, quantities, { value: totalCost });
+        await tx.wait();
+        alert("Gift mint sent!");
+      } catch (err) {
+        alert("Gift failed: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
