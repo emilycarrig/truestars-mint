@@ -3,6 +3,7 @@
 <html>
 <head>
   <title>Gift NFTs</title>
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3modal@2.5.0/dist/index.umd.js"></script>
   <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
 </head>
 <body>
@@ -25,6 +26,13 @@
 
     let signer;
     let contract;
+    let provider;
+
+    const web3Modal = new window.Web3Modal.default({
+      projectId: "1bbbd7d53c505254080b08eb944e9c91",
+      walletConnectVersion: 2,
+      themeMode: "light"
+    });
 
     function checkPassword() {
       const pass = document.getElementById("adminPass").value;
@@ -36,19 +44,15 @@
     }
 
     async function connectWallet() {
-      if (typeof window.ethereum === 'undefined') {
-        alert("No wallet detected. Please install MetaMask or another Web3 wallet.");
-        return;
-      }
       try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
+        const instance = await web3Modal.connect();
+        provider = new ethers.providers.Web3Provider(instance);
         signer = provider.getSigner();
-        contract = new ethers.Contract(contractAddress, abi, signer);
         const address = await signer.getAddress();
+        contract = new ethers.Contract(contractAddress, abi, signer);
         document.getElementById("walletStatus").innerText = "Connected: " + address;
       } catch (err) {
-        console.error(err);
+        console.error("Wallet connection failed:", err);
         alert("Wallet connection failed.");
       }
     }
