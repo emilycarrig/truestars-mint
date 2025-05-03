@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mint Your True Star NFT</title>
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+</head>
+<body>
+  <h1>Mint Your True Star NFT</h1>
+  <button onclick="connectWallet()">Connect Wallet</button><br><br>
+  <label>Quantity: <input id="quantity" type="number" value="1" min="1"></label>
+  <button onclick="mint()">Mint for 0.05 ETH each</button>
+
+  <script>
+    const contractAddress = "0x2baAfa9961EDff4a313127Aa3baE2b9bd06FE58E";
+    const abi = [{"inputs":[{"internalType":"uint256","name":"_numTokens","type":"uint256"}],"name":"publicMint","outputs":[],"stateMutability":"payable","type":"function"}];
+
+    let signer;
+    let contract;
+
+    async function connectWallet() {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      contract = new ethers.Contract(contractAddress, abi, signer);
+      alert("Wallet connected");
+    }
+
+    async function mint() {
+      const quantity = parseInt(document.getElementById("quantity").value);
+      const totalPrice = ethers.utils.parseEther("0.05").mul(quantity);
+      try {
+        const tx = await contract.publicMint(quantity, { value: totalPrice });
+        await tx.wait();
+        alert("Mint successful!");
+      } catch (err) {
+        alert("Mint failed: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
