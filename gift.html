@@ -12,6 +12,7 @@
 
   <div id="giftSection" style="display:none;">
     <button onclick="connectWallet()">Connect Wallet</button><br><br>
+    <div id="walletStatus"></div><br>
     <label>Wallets (comma separated):<br><textarea id="wallets" rows="5" cols="60"></textarea></label><br>
     <label>Quantity for each:<input id="quantity" type="number" value="1" min="1"></label><br>
     <button onclick="gift()">Send Gift Mints</button>
@@ -35,20 +36,33 @@
     }
 
     async function connectWallet() {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      signer = provider.getSigner();
-      contract = new ethers.Contract(contractAddress, abi, signer);
-      alert("Wallet connected");
+      if (typeof window.ethereum === 'undefined') {
+        alert("No wallet detected. Please install MetaMask or another Web3 wallet.");
+        return;
+      }
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        contract = new ethers.Contract(contractAddress, abi, signer);
+        const address = await signer.getAddress();
+        document.getElementById("walletStatus").innerText = "Connected: " + address;
+      } catch (err) {
+        console.error(err);
+        alert("Wallet connection failed.");
+      }
     }
 
     async function gift() {
+      if (!signer || !contract) {
+        alert("Please connect your wallet first.");
+        return;
+      }
       const wallets = document.getElementById("wallets").value.split(",").map(w => w.trim());
       const qty = parseInt(document.getElementById("quantity").value);
       const quantities = wallets.map(() => qty);
-      const totalCost = ethers.utils.parseEther("0").mul(wallets.length);
       try {
-        const tx = await contract.gift(wallets, quantities, { value: totalCost });
+        const tx = await contract.gift(wallets, quantities);
         await tx.wait();
         alert("Gift mint sent!");
       } catch (err) {
