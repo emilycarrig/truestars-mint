@@ -8,6 +8,7 @@
 <body>
   <h1>Mint Your True Star NFT</h1>
   <button onclick="connectWallet()">Connect Wallet</button><br><br>
+  <div id="walletStatus"></div><br>
   <label>Quantity: <input id="quantity" type="number" value="1" min="1"></label>
   <button onclick="mint()">Mint for 0.05 ETH each</button>
 
@@ -19,14 +20,28 @@
     let contract;
 
     async function connectWallet() {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      signer = provider.getSigner();
-      contract = new ethers.Contract(contractAddress, abi, signer);
-      alert("Wallet connected");
+      if (typeof window.ethereum === 'undefined') {
+        alert("No wallet detected. Please install MetaMask or another Web3 wallet.");
+        return;
+      }
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        contract = new ethers.Contract(contractAddress, abi, signer);
+        const address = await signer.getAddress();
+        document.getElementById("walletStatus").innerText = "Connected: " + address;
+      } catch (err) {
+        console.error(err);
+        alert("Wallet connection failed.");
+      }
     }
 
     async function mint() {
+      if (!signer || !contract) {
+        alert("Please connect your wallet first.");
+        return;
+      }
       const quantity = parseInt(document.getElementById("quantity").value);
       const totalPrice = ethers.utils.parseEther("0.05").mul(quantity);
       try {
