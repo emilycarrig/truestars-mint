@@ -3,9 +3,12 @@
 <html>
 <head>
   <title>Gift NFTs</title>
-  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.12/dist/index.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  
+<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.12/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
 </head>
 <body>
   <h1>Admin: Gift NFTs</h1>
@@ -33,7 +36,7 @@
       walletconnect: {
         package: window.WalletConnectProvider.default,
         options: {
-          infuraId: "9aa8f9b1aa134d64bd2c",
+          infuraId: "9aa8f9b1aa134d64bd2c"
         }
       }
     };
